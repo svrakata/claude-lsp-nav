@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# lsp-body — print a function/block body from the line it starts on
+# Usage:   lsp-body <file>:<line>
+#          lsp-body <file> <line>
+# Output:  source from <line> through the matching close-brace, with line numbers.
+#
+# Walks forward from <line>, finds the first '{', then balance-counts braces
+# (stripping string/char literals on the fly) until depth returns to 0.
+# Works for functions, methods, classes, blocks. Fails on heavy template-literal
+# code with unbalanced braces inside backticks — for that, fall back to Read.
+
+set -euo pipefail
+
+if [ $# -lt 1 ]; then
+  echo "usage: lsp-body <file>:<line>" >&2
+  echo "       lsp-body <file> <line>" >&2
+  exit 2
+fi
+
+if [[ "$1" == *:* ]]; then
+  file="${1%%:*}"
+  start="${1##*:}"
+else
+  file="$1"
+  start="$2"
+fi
+
+if [ ! -f "$file" ]; then
+  echo "lsp-body: '$file' not found" >&2
+  exit 1
+fi
+
+awk -v start="$start" '
+NR < start { next }
+{
+  # Make a brace-counting copy of the line with strings/chars stripped.
+  s = $0
+  gsub(/"(\\.|[^"\\])*"/, "", s)
+  gsub(/'\''(\\.|[^'\''\\])*'\''/, "", s)
+  # NOTE: template literals (backticks) are not stripped; this is a known gap.
+
+  # Print the original line with number + marker on the start line.
+  marker = (NR == start) ? ">" : " "
+  printf "%s %4d  %s\n", marker, NR, $0
+
+  # Count braces in the stripped copy.
+  n_open = gsub(/\{/, "{", s)
+  n_close = gsub(/\}/, "}", s)
+  depth += n_open
+  depth -= n_close
+
+  # Once we have seen at least one open brace and depth is back to 0, stop.
+  if (n_open > 0 || n_close > 0) { seen = 1 }
+  if (seen && depth <= 0) { exit }
+}' "$file"

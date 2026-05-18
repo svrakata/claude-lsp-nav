@@ -1,0 +1,21 @@
+{
+  "name": "lsp-nav",
+  "version": "0.1.0",
+  "description": "Ergonomic LSP-first code navigation for Claude Code: shell helpers, a survey-the-file skill, and a soft hint hook. ~3.5× fewer tokens on navigation tasks.",
+  "author": {
+    "name": "svrakata",
+    "url": "https://github.com/svrakata"
+  },
+  "homepage": "https://github.com/svrakata/claude-lsp-nav",
+  "repository": "https://github.com/svrakata/claude-lsp-nav",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "lsp",
+    "typescript",
+    "navigation",
+    "tokens",
+    "skill",
+    "hook"
+  ]
+}

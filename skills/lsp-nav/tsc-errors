@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# tsc-errors — collapse `tsc` output to one line per error.
+# Usage:   tsc-errors                  # runs `pnpm exec tsc --noEmit` and filters
+#          tsc-errors < tsc.log        # filters existing output via stdin
+#          pnpm tsc | tsc-errors       # filters piped output
+# Output:  <file>:<line>:<col>  TS<code>  <message>
+#
+# Strips ANSI color codes and reduces tsc's verbose output (source excerpts,
+# arrow-underline lines, blank separators) to one diagnostic line per error.
+# Handles both standard shapes:
+#   src/foo.ts(42,17): error TS2304: Cannot find name 'bar'.
+#   src/foo.ts:42:17 - error TS2304: Cannot find name 'bar'.
+
+set -uo pipefail
+
+filter() {
+  # Strip ANSI escapes, then keep only diagnostic header lines.
+  sed 's/\x1b\[[0-9;]*m//g' | awk '
+    # Shape A: file.ts(line,col): error TSxxxx: msg
+    /\.(ts|tsx)\([0-9]+,[0-9]+\):[[:space:]]+error[[:space:]]+TS[0-9]+:/ {
+      sub(/\(/, ":")
+      sub(/,/, ":")
+      sub(/\): error/, "  error")
+      print
+      next
+    }
+    # Shape B: file.ts:line:col - error TSxxxx: msg
+    /\.(ts|tsx):[0-9]+:[0-9]+[[:space:]]+-[[:space:]]+error[[:space:]]+TS[0-9]+:/ {
+      sub(/ - error/, "  error")
+      print
+      next
+    }
+  '
+}
+
+if [ -t 0 ]; then
+  # Interactive — run tsc ourselves.
+  pnpm exec tsc --noEmit 2>&1 | filter
+else
+  # Piped/redirected stdin — filter that.
+  filter
+fi

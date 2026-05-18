@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# lsp-context — print 1–N lines around a file:line coordinate.
+# Usage:   lsp-context <file>:<line> [n]
+#          lsp-context <file> <line> [n]
+# Output:  N lines centered on <line>, prefixed with line numbers.
+#
+# Companion to lsp-find / LSP findReferences. After LSP gives you bare
+# file:line:col coordinates, use this to see the actual code without
+# re-Reading the whole file.
+
+set -euo pipefail
+
+if [ $# -lt 1 ]; then
+  echo "usage: lsp-context <file>:<line> [n]" >&2
+  echo "       lsp-context <file> <line> [n]" >&2
+  exit 2
+fi
+
+# Accept "file:line" or "file line"
+if [[ "$1" == *:* ]]; then
+  file="${1%%:*}"
+  line="${1##*:}"
+  n="${2:-2}"
+else
+  file="$1"
+  line="$2"
+  n="${3:-2}"
+fi
+
+if [ ! -f "$file" ]; then
+  echo "lsp-context: '$file' not found" >&2
+  exit 1
+fi
+
+start=$(( line - n ))
+end=$(( line + n ))
+if [ "$start" -lt 1 ]; then start=1; fi
+
+awk -v s="$start" -v e="$end" -v target="$line" 'NR>=s && NR<=e {
+  marker = (NR == target) ? ">" : " "
+  printf "%s %4d  %s\n", marker, NR, $0
+}' "$file"

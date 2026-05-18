@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# lsp-enrich-refs — add line content to LSP findReferences output.
+# Usage:   <LSP findReferences output> | lsp-enrich-refs
+# Output:  one line per ref: <file>:<line>: <matched-line-content>
+#
+# LSP findReferences returns only file:line:col — no line text. Pipe its
+# output through this script to get grep -n style results: the same
+# accurate refs, but with the actual matched line visible. Saves a follow-up
+# Read when you need "called with what args?" context.
+#
+# Also handles incomingCalls / outgoingCalls / goToDefinition output —
+# anything that emits "<file>:<line>" or "Line <N>:<col>" style refs.
+
+set -euo pipefail
+
+# Strategy: parse two LSP output shapes.
+#
+# Shape 1 (findReferences):
+#   src/foo/bar.ts:
+#     Line 58:23
+#     Line 393:5
+#
+# Shape 2 (goToDefinition / single-line):
+#   Defined in src/foo/bar.ts:58:23
+#
+# Shape 3 (incomingCalls / outgoingCalls):
+#   src/foo/bar.ts:
+#     someFn (Function) - Line 76 [calls at: 93:7]
+
+current_file=""
+
+while IFS= read -r raw; do
+  # Drop blank lines and pure status lines like "Found N references..."
+  line="$raw"
+  [ -z "$line" ] && continue
+
+  # Capture "file.ts:" headers (Shape 1 / 3)
+  if [[ "$line" =~ ^([^[:space:]]+\.(ts|tsx|js|jsx|mts|cts)):[[:space:]]*$ ]]; then
+    current_file="${BASH_REMATCH[1]}"
+    continue
+  fi
+
+  # Shape 2: "Defined in path:line:col" — single-shot.
+  if [[ "$line" =~ ([^[:space:]]+\.(ts|tsx|js|jsx|mts|cts)):([0-9]+):([0-9]+) ]]; then
+    f="${BASH_REMATCH[1]}"
+    ln="${BASH_REMATCH[3]}"
+    if [ -f "$f" ]; then
+      content=$(sed -n "${ln}p" "$f")
+      printf "%s:%s: %s\n" "$f" "$ln" "$content"
+      continue
+    fi
+  fi
+
+  # Shape 1/3: "Line N:C" or "Line N [calls at: X:Y]" under a current_file header.
+  if [ -n "$current_file" ] && [[ "$line" =~ Line[[:space:]]+([0-9]+) ]]; then
+    ln="${BASH_REMATCH[1]}"
+    # If "calls at: X:Y" is present, prefer that as the actual call site line.
+    if [[ "$line" =~ calls\ at:[[:space:]]*([0-9]+):([0-9]+) ]]; then
+      ln="${BASH_REMATCH[1]}"
+    fi
+    if [ -f "$current_file" ]; then
+      content=$(sed -n "${ln}p" "$current_file")
+      # Trim leading whitespace from the matched line for readability.
+      content="${content#"${content%%[![:space:]]*}"}"
+      printf "%s:%s: %s\n" "$current_file" "$ln" "$content"
+    fi
+  fi
+done
