@@ -7,9 +7,9 @@
   "plugins": [
     {
       "name": "lsp-nav",
-      "source": ".",
+      "source": "./lsp-nav",
       "description": "Ergonomic LSP-first code navigation (TS/JS only, requires typescript-lsp plugin for LSP recipes). 5 shell helpers + survey skill + soft Read hook. ~3.9× fewer tokens on navigation tasks across 40 measured cases.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "license": "MIT",
       "keywords": [
         "claude-code",
