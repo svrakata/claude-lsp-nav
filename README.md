@@ -27,14 +27,42 @@ A Claude Code plugin that makes LSP-style code navigation cheap and obvious to r
 
 ## Install
 
+In Claude Code:
+
 ```
 /plugin marketplace add svrakata/claude-lsp-nav
 /plugin install lsp-nav@lsp-nav-plugins
+/reload-plugins
 ```
 
-Restart Claude Code. The skill auto-loads on navigation tasks; the hook fires on every `Read`; the helpers are available at `${CLAUDE_PLUGIN_ROOT}/skills/lsp-nav/`.
+That's it. The skill auto-loads on navigation tasks; the hook fires on every `Read`; the helpers are available at `${CLAUDE_PLUGIN_ROOT}/skills/lsp-nav/`. (Restarting Claude Code also works in place of `/reload-plugins`, but the slash command is faster.)
 
-> The marketplace `name` field is `lsp-nav-plugins` (not `claude-lsp-nav`) due to a Claude Code bug — names without `-plugins`/`-code` suffix trigger a false "unsupported source type" error on install. See [anthropics/claude-code#56043](https://github.com/anthropics/claude-code/issues/56043).
+### Why the install ID is `@lsp-nav-plugins` and not `@claude-lsp-nav`
+
+The repo is `svrakata/claude-lsp-nav` but the marketplace's `name` field inside `.claude-plugin/marketplace.json` is `lsp-nav-plugins`. That's the ID `/plugin install` expects after the `@`.
+
+The mismatch is intentional and works around a Claude Code 2.1.x bug ([#56043](https://github.com/anthropics/claude-code/issues/56043)): marketplace names without a `-plugins` / `-code` / `-skill` suffix trip a name-validator that falsely surfaces a "this plugin uses a source type your Claude Code version does not support" error on install. Renaming the marketplace ID to `lsp-nav-plugins` bypasses the bug while keeping the repo URL clean. Once the bug is patched upstream, we may rename back to `claude-lsp-nav`.
+
+## Upgrading
+
+The local marketplace cache doesn't auto-refresh on `git push`. To pick up a new version:
+
+```
+/plugin marketplace remove lsp-nav-plugins
+/plugin marketplace add svrakata/claude-lsp-nav
+/plugin install lsp-nav@lsp-nav-plugins
+/reload-plugins
+```
+
+The `remove` wipes `~/.claude/plugins/marketplaces/lsp-nav-plugins/`, the `add` re-clones with the latest content, and `install` + `reload` activate it. `/plugin marketplace update lsp-nav-plugins` may also work on newer Claude Code versions; the remove + re-add path is the reliable fallback.
+
+Check your installed version any time:
+
+```
+cat ~/.claude/plugins/marketplaces/lsp-nav-plugins/lsp-nav/.claude-plugin/plugin.json
+```
+
+Compare against the latest in the repo at https://github.com/svrakata/claude-lsp-nav/blob/main/lsp-nav/.claude-plugin/plugin.json.
 
 ## What it does, concretely
 
