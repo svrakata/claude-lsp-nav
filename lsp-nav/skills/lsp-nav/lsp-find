@@ -23,16 +23,19 @@ decl_pattern="\b(export\s+)?(async\s+)?(function|const|class|interface|type|let|
 
 # Find declarations, then drop lines that look like imports or re-exports
 # (`from "..."`/`from '...'` is the giveaway).
+# --type-not md skips markdown files — declaration-shaped patterns in docs
+# (e.g. `**fulfillAssets**` in a CLAUDE.md table) used to win when the real
+# declaration was a property, not a top-level fn.
 hit=$(
-  rg -n --column --pcre2 "$decl_pattern" "$path" 2>/dev/null \
+  rg -n --column --pcre2 --type-not md "$decl_pattern" "$path" 2>/dev/null \
     | rg -v "from\s+['\"]" \
     | head -1 \
     || true
 )
 
 if [ -z "$hit" ]; then
-  # Fallback: first occurrence anywhere (may be an import).
-  hit=$(rg -n --column --pcre2 "\b${symbol}\b" "$path" 2>/dev/null | head -1 || true)
+  # Fallback: first occurrence anywhere (may be an import). Still skip markdown.
+  hit=$(rg -n --column --pcre2 --type-not md "\b${symbol}\b" "$path" 2>/dev/null | head -1 || true)
 fi
 
 if [ -z "$hit" ]; then
