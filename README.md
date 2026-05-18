@@ -28,10 +28,13 @@ A Claude Code plugin that makes LSP-style code navigation cheap and obvious to r
 ## Install
 
 ```
-/plugin install lsp-nav@svrakata/claude-lsp-nav
+/plugin marketplace add svrakata/claude-lsp-nav
+/plugin install lsp-nav@lsp-nav-plugins
 ```
 
 Restart Claude Code. The skill auto-loads on navigation tasks; the hook fires on every `Read`; the helpers are available at `${CLAUDE_PLUGIN_ROOT}/skills/lsp-nav/`.
+
+> The marketplace `name` field is `lsp-nav-plugins` (not `claude-lsp-nav`) due to a Claude Code bug — names without `-plugins`/`-code` suffix trigger a false "unsupported source type" error on install. See [anthropics/claude-code#56043](https://github.com/anthropics/claude-code/issues/56043).
 
 ## What it does, concretely
 

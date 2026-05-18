@@ -1,5 +1,5 @@
 {
-  "name": "claude-lsp-nav",
+  "name": "lsp-nav-plugins",
   "owner": {
     "name": "svrakata",
     "url": "https://github.com/svrakata"
@@ -9,7 +9,7 @@
       "name": "lsp-nav",
       "source": "./lsp-nav",
       "description": "Ergonomic LSP-first code navigation (TS/JS only, requires typescript-lsp plugin for LSP recipes). 5 shell helpers + survey skill + soft Read hook. ~3.9× fewer tokens on navigation tasks across 40 measured cases.",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "license": "MIT",
       "keywords": [
         "claude-code",
