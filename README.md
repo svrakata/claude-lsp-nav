@@ -4,6 +4,15 @@
 
 A Claude Code plugin that makes LSP-style code navigation cheap and obvious to reach for — without forcing it.
 
+## Requirements
+
+- **TypeScript / JavaScript projects only.** The shell helpers are JS/TS-aware (recognize `function` / `const` / `class` / `interface` / `type` / `enum`). The hook only fires on `.ts` / `.tsx` / `.js` / `.jsx` / `.mts` / `.cts` and `.md` files. Other languages won't get the helper benefit; the skill won't auto-trigger.
+- **Claude Code's official `typescript-lsp` plugin enabled.** The skill's LSP-based recipes (`documentSymbol`, `findReferences`, `goToDefinition`, `outgoingCalls`, etc.) call the in-harness `LSP` tool that this plugin provides. Enable it via `/plugin install typescript-lsp@claude-plugins-official` (or check `~/.claude/settings.json` → `enabledPlugins`).
+
+  **Without the typescript-lsp plugin** the shell helpers (`lsp-find`, `lsp-context`, `lsp-body`, `lsp-enrich-refs`, `tsc-errors`) and the soft Read hook still work — they don't depend on LSP — but the skill's "use LSP for X" recipes won't.
+- **`ripgrep`** (`rg`) on PATH. Used by `lsp-find`. Pre-installed on most dev machines; `brew install ripgrep` / `apt install ripgrep` otherwise.
+- **`node`** on PATH. Used by the hook to parse the JSON payload (the alternative `jq` isn't assumed to be installed everywhere).
+
 ## What's inside
 
 | Component | Purpose |

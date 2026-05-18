@@ -1,10 +1,14 @@
 ---
 name: lsp-nav
-description: Navigate TypeScript code via LSP (definitions, references, callers, callees, document outlines) instead of reading full source files. Use for "where is X defined", "what calls Y", "what does Z call", "what's the structure of this file", "find all implementations of this interface" — anything structural, not content. Cuts token cost ~3× on a 400-line file.
+description: Navigate TypeScript code via LSP (definitions, references, callers, callees, document outlines) instead of reading full source files. Use for "where is X defined", "what calls Y", "what does Z call", "what's the structure of this file", "find all implementations of this interface" — anything structural, not content. Cuts token cost ~3× on a 400-line file. TypeScript / JavaScript only; requires the typescript-lsp plugin for LSP-based recipes (shell helpers work without it).
 allowed-tools: LSP Bash Read
 ---
 
 # LSP-Nav: token-cheap code navigation
+
+**Scope:** TypeScript / JavaScript projects only. The `lsp-find` regex matches JS/TS declaration keywords; the hook filters on `.ts`/`.tsx`/`.js`/`.jsx`/`.mts`/`.cts` (and `.md` for the survey hint). Other languages won't benefit.
+
+**Prerequisite for LSP-based recipes:** Claude Code's official `typescript-lsp` plugin must be enabled. That plugin provides the in-harness `LSP` tool the recipes below call. Without it, fall back to the shell helpers (`lsp-find` / `lsp-context` / `lsp-body` / `lsp-enrich-refs` / `tsc-errors`) — they work standalone.
 
 The `LSP` tool is a **deferred** tool — its schema is not loaded by default. Before first use in a session, run:
 

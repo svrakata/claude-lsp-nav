@@ -1,7 +1,7 @@
 {
   "name": "lsp-nav",
-  "version": "0.1.0",
-  "description": "Ergonomic LSP-first code navigation for Claude Code: shell helpers, a survey-the-file skill, and a soft hint hook. ~3.5× fewer tokens on navigation tasks.",
+  "version": "0.1.1",
+  "description": "Ergonomic LSP-first code navigation for Claude Code (TypeScript / JavaScript only, requires the typescript-lsp plugin for LSP-based recipes). Shell helpers, a survey-the-file skill, and a soft hint hook. ~3.9× fewer tokens on navigation tasks.",
   "author": {
     "name": "svrakata",
     "url": "https://github.com/svrakata"
@@ -13,6 +13,7 @@
     "claude-code",
     "lsp",
     "typescript",
+    "javascript",
     "navigation",
     "tokens",
     "skill",
